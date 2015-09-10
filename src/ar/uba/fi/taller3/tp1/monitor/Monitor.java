@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.uba.fi.taller3.tp1.Log;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
 public class Monitor implements Runnable {
@@ -39,11 +40,10 @@ public class Monitor implements Runnable {
 				event.execute(mStatistics);
 				long currentTimeStamp = System.currentTimeMillis();
 				if(currentTimeStamp - lastRenderedTimestamp > MONITOR_INTERVAL_MS){
-					//System.out.println(mStatistics.toString());
 					mPrintWriter.println(mStatistics.toString());
 				}
 			} catch (InterruptedException e) {
-				System.out.println("Interrupted. Finishing..");
+				Log.log("Interrupted. Finishing..");
 				finish = true;
 				e.printStackTrace();
 			}

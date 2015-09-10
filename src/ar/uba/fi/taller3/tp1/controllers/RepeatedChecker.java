@@ -1,10 +1,11 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.controllers;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.uba.fi.taller3.tp1.Log;
+import ar.uba.fi.taller3.tp1.domain.UrlRepository;
+import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeRepeatedChecker;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
@@ -40,13 +41,11 @@ public class RepeatedChecker implements Runnable {
 					if(!urlRepository.contains(url)){
 						urlRepository.add(url);
 						mQueueTo.put(request);
-					}else{
-						System.out.println("URL: " + url.toString() + " already downloaded.");
 					}
 				}
 				mMonitorQueue.put(new ChangeRepeatedChecker(false));
 			} catch (InterruptedException e) {
-				System.out.println("Interrupted. Finishing..");
+				Log.log("Interrupted. Finishing..");
 				finish = true;
 				e.printStackTrace();
 			}

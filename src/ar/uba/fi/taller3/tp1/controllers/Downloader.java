@@ -1,4 +1,4 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.controllers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ar.uba.fi.taller3.tp1.monitor.events.ChangeHtmlDownloaderEvent;
+import ar.uba.fi.taller3.tp1.Log;
+import ar.uba.fi.taller3.tp1.domain.Document;
+import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 import ar.uba.fi.taller3.tp1.monitor.events.ProcessedUrlEvent;
 
@@ -58,13 +60,13 @@ public abstract class Downloader implements Runnable {
 					}
 
 				} catch (IOException e) {
-					System.out.println("Could not open conecction to " + url.toString());
+					Log.log("Could not open conecction to " + url.toString());
 					e.printStackTrace();
 				} finally {
 					end();
 				}
 			} catch (InterruptedException e) {
-				System.out.println("Interrupted. Finishing..");
+				Log.log("Interrupted. Finishing..");
 				finish = true;
 				e.printStackTrace();
 			}

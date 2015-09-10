@@ -1,7 +1,9 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.controllers;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.uba.fi.taller3.tp1.domain.Document;
+import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeResourceDownloaderEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 

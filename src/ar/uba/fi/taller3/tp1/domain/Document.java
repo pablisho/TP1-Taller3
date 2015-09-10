@@ -1,4 +1,4 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.domain;
 
 public class Document {
 

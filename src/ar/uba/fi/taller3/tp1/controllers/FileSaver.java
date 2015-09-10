@@ -1,10 +1,12 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.controllers;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.uba.fi.taller3.tp1.Log;
+import ar.uba.fi.taller3.tp1.domain.Document;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeFileSaverEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
@@ -40,13 +42,13 @@ public class FileSaver implements Runnable {
 					writer.print(doc.getContent());
 					writer.close();
 				} catch (IOException e) {
-					System.out.println("ERROR WRITING FILE");
+					Log.log("ERROR WRITING FILE");
 					e.printStackTrace();
 				} finally {
 					monitorQueue.put(new ChangeFileSaverEvent(false));
 				}
 			} catch (InterruptedException e) {
-				System.out.println("Interrupted. Finishing..");
+				Log.log("Interrupted. Finishing..");
 				finish = true;
 				e.printStackTrace();
 			}

@@ -1,4 +1,4 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.controllers;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -6,6 +6,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ar.uba.fi.taller3.tp1.Log;
+import ar.uba.fi.taller3.tp1.domain.Document;
+import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeAnalyzerEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
@@ -74,14 +77,13 @@ public class Analyzer implements Runnable {
 						}
 					}
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					System.out.println("MALFORMED URL: " + link);
+					Log.log("MALFORMED URL: " + link);
 					e.printStackTrace();
 				} finally {
 					mMonitorQueue.put(new ChangeAnalyzerEvent(false));
 				}
 			} catch (InterruptedException e) {
-				System.out.println("Interrupted. Finishing..");
+				Log.log("Interrupted. Finishing..");
 				finish = true;
 				e.printStackTrace();
 			}

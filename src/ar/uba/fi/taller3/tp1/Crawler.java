@@ -10,6 +10,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.uba.fi.taller3.tp1.controllers.Analyzer;
+import ar.uba.fi.taller3.tp1.controllers.FileSaver;
+import ar.uba.fi.taller3.tp1.controllers.HtmlDownloader;
+import ar.uba.fi.taller3.tp1.controllers.RepeatedChecker;
+import ar.uba.fi.taller3.tp1.controllers.ResourceDownloader;
+import ar.uba.fi.taller3.tp1.domain.Document;
+import ar.uba.fi.taller3.tp1.domain.UrlRepository;
+import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.Monitor;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
@@ -25,9 +33,47 @@ public class Crawler {
 	
 	private static String URL_HTML_FILE = "html_urls";
 	private static String URL_SRC_FILE = "src_urls";
+	
+	private int htmlDownloaders;
+	private int srcDownloaders;
+	private int analyzers;
+	private int fileSavers;
+	private int htmlCheckers;
+	private int srcCheckers;
+	private String fileLocation;
+	private String htmlUrlLocation;
+	private String srcUrlLocation;
+	
+	private LinkedBlockingQueue<UrlRequest> inputUrlQueue = new LinkedBlockingQueue<UrlRequest>();
+	private LinkedBlockingQueue<UrlRequest> downloadUrlQueue = new LinkedBlockingQueue<UrlRequest>();
+	private LinkedBlockingQueue<Document> docQueue = new LinkedBlockingQueue<Document>();
+	private LinkedBlockingQueue<UrlRequest> inputResQueue = new LinkedBlockingQueue<UrlRequest>();
+	private LinkedBlockingQueue<UrlRequest> downloadResQueue = new LinkedBlockingQueue<UrlRequest>();
+	private LinkedBlockingQueue<Event> monitorQueue = new LinkedBlockingQueue<Event>();
+	private LinkedBlockingQueue<Document> saveQueue = new LinkedBlockingQueue<Document>();
+	
+	private UrlRepository htmlUrlRepository = new UrlRepository(htmlUrlLocation);
+	private UrlRepository srcUrlRepository = new UrlRepository(srcUrlLocation);
+	
+	private Executor htmlCheckerExecutor;
+	private Executor downloaderHtmlExecutor;
+	private Executor analyzerExecutor;
+	private Executor fileSaversExecutor;
+	private Executor downloaderSrcExecutor;
+	private Executor srcCheckerExecutor;
+	private Thread monitorThread;
 
 	public static void main(String[] args) {
-
+		Log.log("Welcome to crawler");
+		Crawler crawler = new Crawler();
+		crawler.loadProperties();
+		crawler.startThreads();
+		crawler.startCrawling();
+		crawler.join();
+		Log.log("Finishing");
+	}
+	
+	private void loadProperties(){
 		Properties properties = new Properties();
 		FileInputStream in;
 		try {
@@ -35,47 +81,38 @@ public class Crawler {
 			properties.load(in);
 			in.close();
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			System.out.println("Could not load properties.");
+			Log.log("Could not load properties.");
 			e1.printStackTrace();
 			return;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("Could not load properties.");
+			Log.log("Could not load properties.");
 			return;
 		}
 
-		int htmlDownloaders = Integer.parseInt(properties
+		htmlDownloaders = Integer.parseInt(properties
 				.getProperty(HTML_AMOUNT));
-		int srcDownloaders = Integer.parseInt(properties
+		srcDownloaders = Integer.parseInt(properties
 				.getProperty(SRC_AMOUNT));
-		int analyzers = Integer.parseInt(properties.getProperty(ANALYZERS_AMOUNT));
-		int fileSavers = Integer.parseInt(properties.getProperty(FILE_SAVERS));
-		int htmlCheckers = Integer.parseInt(properties.getProperty(HTML_CHECKERS));
-		int srcCheckers = Integer.parseInt(properties.getProperty(SRC_CHECKERS));
-		String fileLocation = properties.getProperty(FILE_LOCATION);
-		String htmlUrlLocation = properties.getProperty(URL_HTML_FILE);
-		String srcUrlLocation = properties.getProperty(URL_SRC_FILE);
+		analyzers = Integer.parseInt(properties.getProperty(ANALYZERS_AMOUNT));
+		fileSavers = Integer.parseInt(properties.getProperty(FILE_SAVERS));
+		htmlCheckers = Integer.parseInt(properties.getProperty(HTML_CHECKERS));
+		srcCheckers = Integer.parseInt(properties.getProperty(SRC_CHECKERS));
+		fileLocation = properties.getProperty(FILE_LOCATION);
+		htmlUrlLocation = properties.getProperty(URL_HTML_FILE);
+		srcUrlLocation = properties.getProperty(URL_SRC_FILE);
+	}
+	
+	private void startThreads(){
+		htmlUrlRepository = new UrlRepository(htmlUrlLocation);
+		srcUrlRepository = new UrlRepository(srcUrlLocation);
 		
-		LinkedBlockingQueue<UrlRequest> inputUrlQueue = new LinkedBlockingQueue<UrlRequest>();
-		LinkedBlockingQueue<UrlRequest> downloadUrlQueue = new LinkedBlockingQueue<UrlRequest>();
-		LinkedBlockingQueue<Document> docQueue = new LinkedBlockingQueue<Document>();
-		LinkedBlockingQueue<UrlRequest> inputResQueue = new LinkedBlockingQueue<UrlRequest>();
-		LinkedBlockingQueue<UrlRequest> downloadResQueue = new LinkedBlockingQueue<UrlRequest>();
-		LinkedBlockingQueue<Event> monitorQueue = new LinkedBlockingQueue<Event>();
-		LinkedBlockingQueue<Document> saveQueue = new LinkedBlockingQueue<Document>();
-		System.out.println("Welcome to crawler");
-		
-		UrlRepository htmlUrlRepository = new UrlRepository(htmlUrlLocation);
-		UrlRepository srcUrlRepository = new UrlRepository(srcUrlLocation);
-		
-		Executor htmlCheckerExecutor = Executors.newFixedThreadPool(htmlCheckers);
-		Executor downloaderHtmlExecutor = Executors.newFixedThreadPool(htmlDownloaders);
-		Executor analyzerExecutor = Executors.newFixedThreadPool(analyzers);
-		Executor fileSaversExecutor = Executors.newFixedThreadPool(fileSavers);
-		Executor downloaderSrcExecutor = Executors.newFixedThreadPool(srcDownloaders);
-		Executor srcCheckerExecutor = Executors.newFixedThreadPool(srcCheckers);
+		htmlCheckerExecutor = Executors.newFixedThreadPool(htmlCheckers);
+		downloaderHtmlExecutor = Executors.newFixedThreadPool(htmlDownloaders);
+		analyzerExecutor = Executors.newFixedThreadPool(analyzers);
+		fileSaversExecutor = Executors.newFixedThreadPool(fileSavers);
+		downloaderSrcExecutor = Executors.newFixedThreadPool(srcDownloaders);
+		srcCheckerExecutor = Executors.newFixedThreadPool(srcCheckers);
 		
 		for (int i=0; i< htmlCheckers; i++){
 			htmlCheckerExecutor.execute(new RepeatedChecker(inputUrlQueue,
@@ -101,23 +138,27 @@ public class Crawler {
 			fileSaversExecutor.execute(new FileSaver(saveQueue, monitorQueue,fileLocation));
 		}
 		
-		Thread t1 = new Thread(new Monitor(monitorQueue));
-		t1.start();
-		
+		monitorThread = new Thread(new Monitor(monitorQueue));
+		monitorThread.start();
+	}
+	
+	private void startCrawling(){
 		String urlString = "http://www.google.com";
 		try {
 			inputUrlQueue.add(new UrlRequest(new URL(urlString), 0));
 		} catch (MalformedURLException e) {
-			System.out.println("La URL no fue generada correctamene");
+			Log.log("La URL no fue generada correctamene");
 			e.printStackTrace();
 		}
-		try {
-			t1.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Finishing");
 	}
+	
+	private void join(){
+		try {
+			monitorThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 }

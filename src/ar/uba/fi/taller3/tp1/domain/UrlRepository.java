@@ -1,4 +1,4 @@
-package ar.uba.fi.taller3.tp1;
+package ar.uba.fi.taller3.tp1.domain;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+
+import ar.uba.fi.taller3.tp1.Log;
 
 
 public class UrlRepository {
@@ -29,7 +31,7 @@ public class UrlRepository {
 		       }
 		    }
 		}catch(IOException ex){
-			System.out.println("Warning: File does not exist");
+			Log.log("Warning: File does not exist");
 		}
 		return false;
 	}
