@@ -6,7 +6,12 @@ import ar.uba.fi.taller3.tp1.domain.Document;
 import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeHtmlDownloaderEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
+import ar.uba.fi.taller3.tp1.monitor.events.ProcessedHtmlEvent;
 
+/**
+ * Downloader implementation for Html links.
+ *
+ */
 public class HtmlDownloader extends Downloader {
 
 	private LinkedBlockingQueue<Document> analyzerQueue;
@@ -36,6 +41,9 @@ public class HtmlDownloader extends Downloader {
 		}
 		if(analyzerQueue != null){
 			analyzerQueue.put(doc);
+		}
+		if(mMonitorQueue != null){
+			mMonitorQueue.put(new ProcessedHtmlEvent());
 		}
 	}
 

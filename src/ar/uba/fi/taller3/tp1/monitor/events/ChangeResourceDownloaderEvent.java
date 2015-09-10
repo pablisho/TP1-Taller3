@@ -2,6 +2,10 @@ package ar.uba.fi.taller3.tp1.monitor.events;
 
 import ar.uba.fi.taller3.tp1.monitor.Statistics;
 
+/**
+ * Change the amount of Resource Downloader threads.
+ *
+ */
 public class ChangeResourceDownloaderEvent implements Event {
 
 	private boolean mAdd;

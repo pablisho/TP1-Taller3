@@ -2,6 +2,10 @@ package ar.uba.fi.taller3.tp1.monitor.events;
 
 import ar.uba.fi.taller3.tp1.monitor.Statistics;
 
+/**
+ * Change the amount of repeat checkers threads.
+ *
+ */
 public class ChangeRepeatedChecker implements Event {
 
 	private boolean mAdd;

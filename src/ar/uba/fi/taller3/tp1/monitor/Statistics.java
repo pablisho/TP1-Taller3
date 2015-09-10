@@ -1,7 +1,12 @@
 package ar.uba.fi.taller3.tp1.monitor;
 
+/**
+ * Statistics object.
+ *
+ */
 public class Statistics {
 	private int numberOfDownloadedPages;
+	private int numberOfDownloadedResources;
 	private int numberOfActiveHtmlDownloaderThreads;
 	private int numberOfActiveResDownloaderThreads;
 	private int numberOfActiveAnalyzerThreads;
@@ -23,6 +28,10 @@ public class Statistics {
 	
 	public void addDownloadedPage(){
 		numberOfDownloadedPages++;
+	}
+	
+	public void addDownloadedResource(){
+		numberOfDownloadedResources++;
 	}
 	
 	public void subDownloadedPage(){
@@ -65,6 +74,7 @@ public class Statistics {
 	public String toString(){
 		return 	"ESTADISTICAS: \n" + 
 				"CANTIDAD DE PAG BAJADAS: " + numberOfDownloadedPages + "\n" +
+				"CANTIDAD DE RESOURCES BAJADOS: " + numberOfDownloadedResources + "\n" +
 				"CANTIDAD DE HTML DOWNLOADERS ACTIVOS " + numberOfActiveHtmlDownloaderThreads + "\n"+
 				"CANTIDAD DE RES DOWNLOADERS ACTIVOS " + numberOfActiveResDownloaderThreads + "\n"+
 				"CANTIDAD DE ANALYZERS ACTIVOS " + numberOfActiveAnalyzerThreads + "\n" +

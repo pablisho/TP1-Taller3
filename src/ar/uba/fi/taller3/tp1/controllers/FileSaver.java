@@ -5,23 +5,30 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ar.uba.fi.taller3.tp1.Log;
 import ar.uba.fi.taller3.tp1.domain.Document;
+import ar.uba.fi.taller3.tp1.domain.Log;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeFileSaverEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
+/**
+ * Saves content to a file.
+ *
+ */
 public class FileSaver implements Runnable {
 
+	// Queues.
 	private LinkedBlockingQueue<Document> inputQueue;
 	private LinkedBlockingQueue<Event> monitorQueue;
-	private String fileLocation;
+	// Folder location
+	private String folderLocation;
+	// Finish flag.
 	private boolean finish = false;
 
 	public FileSaver(LinkedBlockingQueue<Document> inputQueue,
 			LinkedBlockingQueue<Event> monitorQueue, String fileLocation) {
 		this.inputQueue = inputQueue;
 		this.monitorQueue = monitorQueue;
-		this.fileLocation =fileLocation;
+		this.folderLocation = fileLocation;
 	}
 
 	@Override
@@ -32,13 +39,17 @@ public class FileSaver implements Runnable {
 		while (!finish) {
 			try {
 				try {
+					// Take task from queue.
 					doc = inputQueue.take();
 					monitorQueue.put(new ChangeFileSaverEvent(true));
 					String folder = doc.getContentType().replace("/", "");
 					String fileName = doc.getName().replace("/", "");
-					file = new File(fileLocation + "/" + folder + "/"+ fileName);
+					// Create file.
+					file = new File(folderLocation + "/" + folder + "/"
+							+ fileName);
 					file.getParentFile().mkdirs();
 					writer = new PrintWriter(file);
+					// Write content.
 					writer.print(doc.getContent());
 					writer.close();
 				} catch (IOException e) {

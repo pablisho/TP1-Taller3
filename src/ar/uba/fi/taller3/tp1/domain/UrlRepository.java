@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 
-import ar.uba.fi.taller3.tp1.Log;
-
-
+/**
+ * Url repository for already downloaded urls.
+ *
+ */
 public class UrlRepository {
 	
 	private String fileName;

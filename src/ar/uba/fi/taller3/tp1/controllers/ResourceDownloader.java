@@ -6,7 +6,12 @@ import ar.uba.fi.taller3.tp1.domain.Document;
 import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.ChangeResourceDownloaderEvent;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
+import ar.uba.fi.taller3.tp1.monitor.events.ProcessedResourceEvent;
 
+/**
+ * Downloader implementation for resources.
+ *
+ */
 public class ResourceDownloader extends Downloader {
 
 	public ResourceDownloader(LinkedBlockingQueue<UrlRequest> queueFrom,
@@ -27,8 +32,11 @@ public class ResourceDownloader extends Downloader {
 
 	@Override
 	protected void sendResponse(Document doc) throws InterruptedException {
-		if(mQueueTo != null){
+		if (mQueueTo != null) {
 			mQueueTo.put(doc);
+		}
+		if (mMonitorQueue != null) {
+			mMonitorQueue.put(new ProcessedResourceEvent());
 		}
 	}
 
