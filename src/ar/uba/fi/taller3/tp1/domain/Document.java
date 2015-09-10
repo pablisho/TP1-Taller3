@@ -9,15 +9,15 @@ public class Document {
 
 	private UrlRequest request;
 	private String contentType;
-	private String content;
+	private byte[] content;
 
-	public Document(UrlRequest request, String contentType, String content){
+	public Document(UrlRequest request, String contentType, byte[] content){
 		this.request = request;
 		this.contentType = contentType;
 		this.content = content;
 	}
 	
-	public String getContent(){
+	public byte[] getContent(){
 		return content;
 	}
 	

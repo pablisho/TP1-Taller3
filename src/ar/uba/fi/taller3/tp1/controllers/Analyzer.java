@@ -57,7 +57,7 @@ public class Analyzer implements Runnable {
 				try {
 					// Take task from queue.
 					doc = mDocQueue.take();
-					text = doc.getContent();
+					text = new String(doc.getContent());
 					mMonitorQueue.put(new ChangeAnalyzerEvent(true));
 					// Match Hrefs
 					matcherLink = patternLink.matcher(text);

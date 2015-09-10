@@ -1,8 +1,11 @@
 package ar.uba.fi.taller3.tp1.controllers;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -11,7 +14,6 @@ import ar.uba.fi.taller3.tp1.domain.Document;
 import ar.uba.fi.taller3.tp1.domain.Log;
 import ar.uba.fi.taller3.tp1.domain.UrlRequest;
 import ar.uba.fi.taller3.tp1.monitor.events.Event;
-import ar.uba.fi.taller3.tp1.monitor.events.ProcessedHtmlEvent;
 
 /**
  * Downloads an Url via Http connection.
@@ -58,19 +60,19 @@ public abstract class Downloader implements Runnable {
 					if (responseCode == RESPONSE_OK) {
 						String contentType = conn
 								.getHeaderField("Content-Type");
-						BufferedReader in = new BufferedReader(
-								new InputStreamReader(conn.getInputStream()));
-						String inputLine;
-						StringBuffer response = new StringBuffer();
-						// Read response.
-						while ((inputLine = in.readLine()) != null) {
-							response.append(inputLine);
-						}
-						in.close();
-						Document doc = new Document(request, contentType,
-								response.toString());
+						InputStream  input  = conn.getInputStream();
+					    byte[]       buffer = new byte[4096];
+					    int          n      = -1;
+					    ByteArrayOutputStream output = new ByteArrayOutputStream();
+					    while ((n = input.read(buffer)) != -1) {
+					    	output.write( buffer, 0, n );
+					    }
+						output.toByteArray();
 						// Redirect output.
+						Document doc = new Document(request, contentType,
+								output.toByteArray());
 						sendResponse(doc);
+						 output.close();
 					}
 
 				} catch (IOException e) {

@@ -1,8 +1,8 @@
 package ar.uba.fi.taller3.tp1.controllers;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import ar.uba.fi.taller3.tp1.domain.Document;
@@ -34,7 +34,7 @@ public class FileSaver implements Runnable {
 	@Override
 	public void run() {
 		Document doc = null;
-		PrintWriter writer = null;
+		FileOutputStream writer = null;
 		File file = null;
 		while (!finish) {
 			try {
@@ -48,9 +48,9 @@ public class FileSaver implements Runnable {
 					file = new File(folderLocation + "/" + folder + "/"
 							+ fileName);
 					file.getParentFile().mkdirs();
-					writer = new PrintWriter(file);
+					writer = new FileOutputStream(file);
 					// Write content.
-					writer.print(doc.getContent());
+					writer.write(doc.getContent());
 					writer.close();
 				} catch (IOException e) {
 					Log.log("ERROR WRITING FILE");
