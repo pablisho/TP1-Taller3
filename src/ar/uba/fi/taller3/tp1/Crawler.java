@@ -30,9 +30,9 @@ public class Crawler {
 	private static String HTML_CHECKERS = "repeat_html_checker";
 	private static String SRC_CHECKERS = "repeat_src_checker";
 	private static String FILE_LOCATION = "files_location";
-	
 	private static String URL_HTML_FILE = "html_urls";
 	private static String URL_SRC_FILE = "src_urls";
+	private static String MONITOR_PERIOD = "monitor_period";
 	
 	private int htmlDownloaders;
 	private int srcDownloaders;
@@ -43,6 +43,7 @@ public class Crawler {
 	private String fileLocation;
 	private String htmlUrlLocation;
 	private String srcUrlLocation;
+	private long monitorPeriod;
 	
 	private LinkedBlockingQueue<UrlRequest> inputUrlQueue = new LinkedBlockingQueue<UrlRequest>();
 	private LinkedBlockingQueue<UrlRequest> downloadUrlQueue = new LinkedBlockingQueue<UrlRequest>();
@@ -101,6 +102,7 @@ public class Crawler {
 		fileLocation = properties.getProperty(FILE_LOCATION);
 		htmlUrlLocation = properties.getProperty(URL_HTML_FILE);
 		srcUrlLocation = properties.getProperty(URL_SRC_FILE);
+		monitorPeriod = Long.parseLong(properties.getProperty(MONITOR_PERIOD));
 	}
 	
 	private void startThreads(){
@@ -138,7 +140,7 @@ public class Crawler {
 			fileSaversExecutor.execute(new FileSaver(saveQueue, monitorQueue,fileLocation));
 		}
 		
-		monitorThread = new Thread(new Monitor(monitorQueue));
+		monitorThread = new Thread(new Monitor(monitorQueue,monitorPeriod));
 		monitorThread.start();
 	}
 	

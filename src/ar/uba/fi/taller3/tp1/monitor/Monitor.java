@@ -3,6 +3,8 @@ package ar.uba.fi.taller3.tp1.monitor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import ar.uba.fi.taller3.tp1.Log;
@@ -10,7 +12,6 @@ import ar.uba.fi.taller3.tp1.monitor.events.Event;
 
 public class Monitor implements Runnable {
 
-	private static final long MONITOR_INTERVAL_MS = 1000;
 	private static final String LOG_FILENAME = "statistics.log";
 	
 	// Evente queue.
@@ -20,10 +21,24 @@ public class Monitor implements Runnable {
 	private PrintWriter mPrintWriter;
 	
 	private boolean finish = false;
-	private long lastRenderedTimestamp = 0;
+	private long monitorPeriod;
 	
-	public Monitor(LinkedBlockingQueue<Event> eventQueue){
+	private TimerTask task = new TimerTask() {
+		@Override
+		public void run() {
+			Log.log("TASK");
+			String statistics;
+			synchronized (mStatistics) {
+				statistics = mStatistics.toString();
+			}
+			mPrintWriter.println(statistics);
+			mPrintWriter.flush();
+		}
+	};
+	
+	public Monitor(LinkedBlockingQueue<Event> eventQueue, long monitorPeriod){
 		this.mEventQueue = eventQueue;
+		this.monitorPeriod = monitorPeriod;
 		try {
 			mPrintWriter = new PrintWriter(new File(LOG_FILENAME));
 		} catch (IOException e) {
@@ -34,13 +49,14 @@ public class Monitor implements Runnable {
 	@Override
 	public void run() {
 		Event event = null;
+		Timer timer =  new Timer();
+		Log.log("Monitor period " + monitorPeriod);
+		timer.scheduleAtFixedRate(task, 1, monitorPeriod);
 		while(!finish){
 			try {
 				event = mEventQueue.take();
-				event.execute(mStatistics);
-				long currentTimeStamp = System.currentTimeMillis();
-				if(currentTimeStamp - lastRenderedTimestamp > MONITOR_INTERVAL_MS){
-					mPrintWriter.println(mStatistics.toString());
+				synchronized (mStatistics) {
+					event.execute(mStatistics);
 				}
 			} catch (InterruptedException e) {
 				Log.log("Interrupted. Finishing..");
