@@ -28,5 +28,9 @@ public class Document {
 	public String getName(){
 		return request.getUrl().toString();
 	}
+
+	public int getDepth() {
+		return request.getDepth();
+	}
 	
 }

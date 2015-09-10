@@ -41,6 +41,7 @@ public class Crawler {
 	private static String URL_SRC_FILE = "src_urls";
 	private static String MONITOR_PERIOD = "monitor_period";
 	private static String LOG_FILENAME = "log_filename";
+	private static String MAX_DEPTH = "max_depth";
 
 	// Properties.
 	private int htmlDownloaders;
@@ -54,6 +55,7 @@ public class Crawler {
 	private String srcUrlLocation;
 	private long monitorPeriod;
 	private String logFileName;
+	private int maxDepth;
 
 	// Queues.
 	private LinkedBlockingQueue<UrlRequest> inputUrlQueue = new LinkedBlockingQueue<UrlRequest>();
@@ -118,6 +120,7 @@ public class Crawler {
 		srcUrlLocation = properties.getProperty(URL_SRC_FILE);
 		monitorPeriod = Long.parseLong(properties.getProperty(MONITOR_PERIOD));
 		logFileName = properties.getProperty(LOG_FILENAME);
+		maxDepth = Integer.parseInt(properties.getProperty(MAX_DEPTH));
 	}
 
 	/**
@@ -142,7 +145,7 @@ public class Crawler {
 		}
 		for (int i = 0; i < analyzers; i++) {
 			analyzerExecutor.execute(new Analyzer(docQueue, inputUrlQueue,
-					inputResQueue, monitorQueue));
+					inputResQueue, monitorQueue,maxDepth));
 		}
 		for (int i = 0; i < htmlDownloaders; i++) {
 			downloaderHtmlExecutor.execute(new HtmlDownloader(downloadUrlQueue,

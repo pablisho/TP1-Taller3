@@ -36,15 +36,19 @@ public class Analyzer implements Runnable {
 
 	// Finish flag.
 	private boolean finish = false;
+	
+	// Max depth for re scheduling pages.
+	private int maxDepth;
 
 	public Analyzer(LinkedBlockingQueue<Document> docQueue, LinkedBlockingQueue<UrlRequest> urlQueue,
-			LinkedBlockingQueue<UrlRequest> resQueue, LinkedBlockingQueue<Event> monitorQueue) {
+			LinkedBlockingQueue<UrlRequest> resQueue, LinkedBlockingQueue<Event> monitorQueue, int maxDepth) {
 		this.mDocQueue = docQueue;
 		this.mUrlQueue = urlQueue;
 		this.mResQueue = resQueue;
 		this.mMonitorQueue = monitorQueue;
 		patternLink = Pattern.compile(HTML_HREF_PATTERN);
 		patternSrc = Pattern.compile(HTML_SRC_PATTERN);
+		this.maxDepth = maxDepth;
 	}
 
 	@Override
@@ -57,35 +61,39 @@ public class Analyzer implements Runnable {
 				try {
 					// Take task from queue.
 					doc = mDocQueue.take();
-					text = new String(doc.getContent());
 					mMonitorQueue.put(new ChangeAnalyzerEvent(true));
-					// Match Hrefs
-					matcherLink = patternLink.matcher(text);
-					while (matcherLink.find()) {
-						link = matcherLink.group(1);
-						if (link != null && !link.isEmpty()) {
-							if (link.charAt(0) == '/') {
-								String urlBase = doc.getName();
-								// Schedule download
-								mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), 0));
-							} else {
-								// Schedule download
-								mUrlQueue.put(new UrlRequest(new URL(link),0));
+					// Check for max depth iteration in pages
+					int depth = doc.getDepth();
+					if(depth < maxDepth){
+						text = new String(doc.getContent());
+						// Match Hrefs
+						matcherLink = patternLink.matcher(text);
+						while (matcherLink.find()) {
+							link = matcherLink.group(1);
+							if (link != null && !link.isEmpty()) {
+								if (link.charAt(0) == '/') {
+									String urlBase = doc.getName();
+									// Schedule download
+									mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), depth+1));
+								} else {
+									// Schedule download
+									mUrlQueue.put(new UrlRequest(new URL(link),depth+1));
+								}
 							}
 						}
-					}
-					// Match Srcs
-					matcherSrc = patternSrc.matcher(text);
-					while (matcherSrc.find()) {
-						link = matcherSrc.group(1);
-						if (link != null && !link.isEmpty()) {
-							if (link.charAt(0) == '/') {
-								String urlBase = doc.getName();
-								// Schedule download
-								mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), 0));
-							} else {
-								// Schedule download
-								mResQueue.put(new UrlRequest(new URL(link),0));
+						// Match Srcs
+						matcherSrc = patternSrc.matcher(text);
+						while (matcherSrc.find()) {
+							link = matcherSrc.group(1);
+							if (link != null && !link.isEmpty()) {
+								if (link.charAt(0) == '/') {
+									String urlBase = doc.getName();
+									// Schedule download
+									mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), depth+1));
+								} else {
+									// Schedule download
+									mResQueue.put(new UrlRequest(new URL(link),depth+1));
+								}
 							}
 						}
 					}
