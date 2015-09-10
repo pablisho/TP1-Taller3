@@ -13,16 +13,18 @@ public class RepeatedChecker implements Runnable {
 	private LinkedBlockingQueue<UrlRequest> mQueueFrom;
 	private LinkedBlockingQueue<UrlRequest> mQueueTo;
 	private LinkedBlockingQueue<Event> mMonitorQueue;
+	private UrlRepository urlRepository;
 	
 	private boolean finish = false;
 	
-	private static List<URL> downloadedUrls = new ArrayList<URL>();
+	
 	
 	public RepeatedChecker(LinkedBlockingQueue<UrlRequest> queueFrom, LinkedBlockingQueue<UrlRequest> queueTo,
-			LinkedBlockingQueue<Event> monitorQueue){
+			LinkedBlockingQueue<Event> monitorQueue, UrlRepository urlRepo){
 		this.mQueueFrom = queueFrom;
 		this.mQueueTo = queueTo;
 		this.mMonitorQueue = monitorQueue;
+		this.urlRepository = urlRepo;
 	}
 	
 	@Override
@@ -34,12 +36,12 @@ public class RepeatedChecker implements Runnable {
 				request = mQueueFrom.take();
 				url = request.getUrl();
 				mMonitorQueue.put(new ChangeRepeatedChecker(true));
-				synchronized (downloadedUrls) {
-					if(!downloadedUrls.contains(url)){
-						downloadedUrls.add(url);
+				synchronized (urlRepository) {
+					if(!urlRepository.contains(url)){
+						urlRepository.add(url);
 						mQueueTo.put(request);
 					}else{
-						//System.out.println("URL: " + url.toString() + " already downloaded.");
+						System.out.println("URL: " + url.toString() + " already downloaded.");
 					}
 				}
 				mMonitorQueue.put(new ChangeRepeatedChecker(false));

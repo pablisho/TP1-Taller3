@@ -12,12 +12,14 @@ public class FileSaver implements Runnable {
 
 	private LinkedBlockingQueue<Document> inputQueue;
 	private LinkedBlockingQueue<Event> monitorQueue;
+	private String fileLocation;
 	private boolean finish = false;
 
 	public FileSaver(LinkedBlockingQueue<Document> inputQueue,
-			LinkedBlockingQueue<Event> monitorQueue) {
+			LinkedBlockingQueue<Event> monitorQueue, String fileLocation) {
 		this.inputQueue = inputQueue;
 		this.monitorQueue = monitorQueue;
+		this.fileLocation =fileLocation;
 	}
 
 	@Override
@@ -32,7 +34,7 @@ public class FileSaver implements Runnable {
 					monitorQueue.put(new ChangeFileSaverEvent(true));
 					String folder = doc.getContentType().replace("/", "");
 					String fileName = doc.getName().replace("/", "");
-					file = new File("./" + folder + "/"+ fileName);
+					file = new File(fileLocation + "/" + folder + "/"+ fileName);
 					file.getParentFile().mkdirs();
 					writer = new PrintWriter(file);
 					writer.print(doc.getContent());

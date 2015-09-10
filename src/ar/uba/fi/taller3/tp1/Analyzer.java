@@ -54,7 +54,8 @@ public class Analyzer implements Runnable {
 						link = matcherLink.group(1);
 						if (link != null && !link.isEmpty()) {
 							if (link.charAt(0) == '/') {
-								// TODO(pablisho): Add base url
+								String urlBase = doc.getName();
+								mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), 0));
 							} else {
 								mUrlQueue.put(new UrlRequest(new URL(link),0));
 							}
@@ -65,7 +66,8 @@ public class Analyzer implements Runnable {
 						link = matcherSrc.group(1);
 						if (link != null && !link.isEmpty()) {
 							if (link.charAt(0) == '/') {
-								// TODO(pablisho): Add base url
+								String urlBase = doc.getName();
+								mUrlQueue.put(new UrlRequest(new URL(urlBase+"/"), 0));
 							} else {
 								mResQueue.put(new UrlRequest(new URL(link),0));
 							}
